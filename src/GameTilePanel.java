@@ -11,6 +11,9 @@ public class GameTilePanel extends JPanel
     int[] tilesSelected; // tiles selected
     int numTilesSelected;    // number of tiles selected
     int[] answers;          // number answers DEBUGGING ONLY
+    Player[] players;       // player objects carrying player state
+    int currentPlayer;      // current player
+
 
     public GameTilePanel()
     {
@@ -27,7 +30,7 @@ public class GameTilePanel extends JPanel
         setLayout(new GridLayout(4, 4));
 
         // loops for buttons
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < tiles.length; i++)
         {
             // initalize tile button
             tiles[i] = new JButton();
@@ -48,9 +51,29 @@ public class GameTilePanel extends JPanel
             answers[i + 1] = i / 2 + 1;
         }
 
+        // initialize player array
+        players = new Player[2];
+
+        // initialize game state
+        initGame();
+
+    }
+
+    // initalizes game state
+    public void initGame()
+    {
+        // initalize all players
+        for (int i = 0; i < players.length; i++)
+        {
+            // initialize player object
+            players[i] = new Player();
+        }
+
         // permute answer array
         permuteArray(answers);
+
     }
+
 
     private void permuteArray(int[] arr)
     {
