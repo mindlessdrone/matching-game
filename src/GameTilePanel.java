@@ -14,7 +14,6 @@ public class GameTilePanel extends JPanel
     Player[] players;       // player objects carrying player state
     int currentPlayer;      // current player
 
-
     public GameTilePanel()
     {
         // local constants
@@ -35,6 +34,9 @@ public class GameTilePanel extends JPanel
             // initalize tile button
             tiles[i] = new JButton();
 
+            // disable all buttons
+            tiles[i].setEnabled(false);
+
             // add listener
             tiles[i].addActionListener(new GameTileListener(i));
 
@@ -54,9 +56,6 @@ public class GameTilePanel extends JPanel
         // initialize player array
         players = new Player[2];
 
-        // initialize game state
-        initGame();
-
     }
 
     // initalizes game state
@@ -71,6 +70,18 @@ public class GameTilePanel extends JPanel
 
         // permute answer array
         permuteArray(answers);
+
+        // set current player to first player
+        currentPlayer = 0;
+
+        // enable all of the buttons
+        for (int i = 0; i < tiles.length; i++)
+        {
+            tiles[i].setText("");
+            tiles[i].setEnabled(true);
+        }
+
+        numTilesSelected = 0;
 
     }
 
@@ -138,7 +149,9 @@ public class GameTilePanel extends JPanel
                 // do they match?
                 if (answers[first] == answers[second])
                 {
-                    System.out.println("YAY");
+                    // add to current player's score
+                    players[currentPlayer % players.length].modifyScore(10);
+
                 }
                 else
                 {
@@ -172,7 +185,16 @@ public class GameTilePanel extends JPanel
                         }
                     }, 1000);
 
-                    // re-enable both tiles
+                }
+
+                // advance to next player
+                currentPlayer += 1;
+
+                // print out scores
+                System.out.println("Current scores, ");
+                for (Player p: players)
+                {
+                    System.out.println("\t" + p.getScore());
                 }
             }
 
