@@ -8,16 +8,23 @@ public class GameTilePanel extends JPanel
 {
     // class fields
     JButton[] tiles;  // tiles used for games
+    DefaultListModel playerLabels;  // list of player labels
     int[] tilesSelected; // tiles selected
     int numTilesSelected;    // number of tiles selected
     int[] answers;          // number answers DEBUGGING ONLY
     Player[] players;       // player objects carrying player state
     int currentPlayer;      // current player
+    
 
     public GameTilePanel()
     {
         // local constants
         // local variables
+        JPanel tilePanel = new JPanel();    // panel for tiles
+        JList<String> scoreList = new JList<>();   // panel used for player scores
+
+        // initialize list model
+        playerLabels = new DefaultListModel();
 
         // initalize tile array
         tiles = new JButton[16];
@@ -26,7 +33,11 @@ public class GameTilePanel extends JPanel
         tilesSelected = new int[16];
 
         // set layout
-        setLayout(new GridLayout(4, 4));
+        setLayout(new BorderLayout());
+
+
+        // set layout for tiles
+        tilePanel.setLayout(new GridLayout(4, 4));
 
         // loops for buttons
         for (int i = 0; i < tiles.length; i++)
@@ -41,7 +52,7 @@ public class GameTilePanel extends JPanel
             tiles[i].addActionListener(new GameTileListener(i));
 
             // add to pane
-            add(tiles[i]);
+            tilePanel.add(tiles[i]);
 
         }
 
@@ -53,19 +64,35 @@ public class GameTilePanel extends JPanel
             answers[i + 1] = i / 2 + 1;
         }
 
-        // initialize player array
-        players = new Player[2];
+        
+
+        // add tile panel
+        add(tilePanel, BorderLayout.CENTER);
+
+        // add score panel
+        scoreList.setModel(playerLabels);
+        add(scoreList, BorderLayout.LINE_START);
 
     }
 
     // initalizes game state
-    public void initGame()
+    public void initGame(int numPlayers)
     {
+        // initialize players array
+        players = new Player[numPlayers];
+
+        
+        // clear players score list
+        playerLabels.removeAllElements();
+
         // initalize all players
         for (int i = 0; i < players.length; i++)
         {
             // initialize player object
             players[i] = new Player();
+
+            // add player score label
+            playerLabels.addElement(String.format("Player %d - 0", i + 1));
         }
 
         // permute answer array
@@ -128,16 +155,17 @@ public class GameTilePanel extends JPanel
             // local constants
             // local variables
             JButton sourceTile = (JButton) e.getSource(); // tile clicked
+            int currPlayer;
 
             sourceTile.setText(new Integer(answers[numButton]).toString());
             sourceTile.setEnabled(false);
-    
+
             // add tile to selected tiles array
             tilesSelected[numTilesSelected] = numButton;
 
             // increment number of tiles selected
             numTilesSelected++;
-            
+
             if (numTilesSelected % 2 == 0)
             {
                 // first tile selected by current player
@@ -151,11 +179,18 @@ public class GameTilePanel extends JPanel
                 {
                     // add to current player's score
                     players[currentPlayer % players.length].modifyScore(10);
+                    
+                    currPlayer = currentPlayer % players.length;
 
+                    // update current players score
+                    playerLabels.setElementAt(String.format("Player %d - %d",
+                                currPlayer + 1,
+                                players[currPlayer].getScore()),
+                            currPlayer);
                 }
                 else
                 {
-                  
+
                     // disable all tiles
                     for (int i = 0; i < tiles.length; i++)
                     {
@@ -185,7 +220,7 @@ public class GameTilePanel extends JPanel
                         }
                     }, 1000);
 
-                }
+                } // end if
 
                 // advance to next player
                 currentPlayer += 1;

@@ -13,19 +13,7 @@ public class SinglePlayerPanel extends JPanel
     //-----------------------------------------------------------------
     //  Sets up this panel with two labels.
     //-----------------------------------------------------------------
-    private final int ROW = 4;
-    private final int COL = 4;
     private JButton start,reset,clear,end;
-    private JButton bt[];
-    private int selected[];
-    private ImageIcon [] img = new ImageIcon [8];
-    String[] names = {"1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg"};
-    String array[]={"0","1","2","3","4","5","6","7"};
-    private int tries = 0;
-    private int totalTries = 0;
-    private int games = 0;
-    private int avg = 0;
-    private JTextField name;
     private JPanel panel1 = new JPanel();
     private GameTilePanel gamePanel;
 
@@ -36,9 +24,6 @@ public class SinglePlayerPanel extends JPanel
         reset = new JButton("Reset the Game");
         clear = new JButton("Clear the Game");
         end = new JButton("End the System");
-        name = new JTextField("Enter your name");
-        bt = new JButton[16];
-        selected = new int[16];
 
         setLayout(new BorderLayout());
 
@@ -55,7 +40,6 @@ public class SinglePlayerPanel extends JPanel
         buttonPanel.add(end);
 
         add(buttonPanel, BorderLayout.LINE_END);
-        add(name, BorderLayout.PAGE_END);
 
         gamePanel = new GameTilePanel();
         add(gamePanel, BorderLayout.CENTER);
@@ -69,35 +53,36 @@ public class SinglePlayerPanel extends JPanel
         {
             if (event.getSource() == start)
             {
-                gamePanel.initGame();        
+                int players = getNumberPlayers();
+                gamePanel.initGame(players);        
             }
         }
     }
 
-    private void setGame()
+    private int getNumberPlayers()
     {
-        Random r = new Random();
-        int d;
-        String temp;
-        int arr [] = new int[16] ;
-        for(int i=0;i<8;i++)
+        // local constants
+        // local variables
+        String userInput;           // string entered from user
+        
+        // get user input
+        userInput = (String) JOptionPane.showInputDialog(this, "How many people will be playing?",
+                                                         "Players", JOptionPane.PLAIN_MESSAGE,
+                                                         null, null, "1");
+        while (!userInput.matches("\\d+"))
         {
-            img[i]=new ImageIcon(names[i]);
+            // display error
+            JOptionPane.showMessageDialog(this, "Input was not in the form of a number",
+                                          "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            
+            // get user input
+            userInput = (String) JOptionPane.showInputDialog(this, "How many people will be playing?",
+                    "Players", JOptionPane.PLAIN_MESSAGE,
+                    null, null, "1");
         }
-        for(int i=1;i<9;i++){
-            bt[i]=new JButton();
-            int rand = r.nextInt(9-i);
 
-            temp = array[8-i];
-            array[8-i] = array[rand];
-            array[rand] = temp;
-
-            bt[i].setText(""+array[8-i]);
-            bt[i].setIcon(img[Integer.parseInt(array[8-i])]);
-            bt[i].setActionCommand(""+array[8-i]);
-
-            panel1.add(bt[i]);
-        }
+        return Integer.parseInt(userInput);
     }
+
 }
 
