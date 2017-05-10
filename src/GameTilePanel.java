@@ -10,7 +10,6 @@ public class GameTilePanel extends JPanel
     JButton[] tiles;  // tiles used for games
     DefaultListModel playerLabels;  // list of player labels
     ArrayList<Integer> tilesSelected; // tiles selected
-    int numTilesSelected;    // number of tiles selected
     int[] answers;          // number answers DEBUGGING ONLY
     Player[] players;       // player objects carrying player state
     int currentTurn;      // current turn number
@@ -125,7 +124,6 @@ public class GameTilePanel extends JPanel
             tiles[i].setEnabled(true);
         }
 
-        numTilesSelected = 0;
 
     }
 
@@ -183,7 +181,7 @@ public class GameTilePanel extends JPanel
 
 
 
-            if (numTilesSelected % 2 == 0)
+            if (tilesSelected.size() % 2 == 0)
             {
                 
                 statusText.setText("Player " +
@@ -200,10 +198,10 @@ public class GameTilePanel extends JPanel
                 }
 
                 // first tile selected by current player
-                first = tilesSelected.get(numTilesSelected - 1);
+                first = tilesSelected.get(tilesSelected.size() - 1);
 
                 // second tile selected by current player
-                second = tilesSelected.get(numTilesSelected - 2);
+                second = tilesSelected.get(tilesSelected.size() - 2);
 
                 // do they match?
                 if (answers[first] == answers[second])
@@ -218,7 +216,7 @@ public class GameTilePanel extends JPanel
 
 
                     // is there a winner?
-                    if (numTilesSelected == 16)
+                    if (tilesSelected.size() == 16)
                     {
                         // is this a single player game?
                         if (players.length == 1)
@@ -281,7 +279,6 @@ public class GameTilePanel extends JPanel
                             tiles[second].setEnabled(true);
                             tiles[second].setText("");
 
-                            numTilesSelected -= 2;
 
                             // re-enable
                             for (int i = 0; i < tiles.length; i++)
@@ -289,9 +286,9 @@ public class GameTilePanel extends JPanel
                                 tiles[i].setEnabled(true);
                             }
 
-                            for (int i = 0; i < numTilesSelected; i++)
+                            for (int i = 0; i < tilesSelected.size(); i++)
                             {
-                                tiles[tilesSelected[i]].setEnabled(false);
+                                tiles[tilesSelected.get(i)].setEnabled(false);
                             }
                         }
                     }, 1000);

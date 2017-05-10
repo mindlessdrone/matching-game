@@ -71,6 +71,7 @@ public class SinglePlayerPanel extends JPanel
             }
             else if (event.getSource() == reset)
             {
+                System.out.println("out");
                 historyPanel.clearHistoryState();
             }
             else
