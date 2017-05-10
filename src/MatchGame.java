@@ -9,12 +9,13 @@ public class MatchGame
     public static void main(String[] args)
     {
         JFrame frame = new JFrame("Match Game");
+        HistoryPanel historyPanel = new HistoryPanel();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JTabbedPane tp = new JTabbedPane();
         tp.addTab("Rules", new RulePanel());
-        tp.addTab("Single Player", new SinglePlayerPanel());
+        tp.addTab("Single Player", new SinglePlayerPanel(historyPanel));
         tp.addTab("Double Players", new DoublePlayersPanel());
-        tp.addTab("History", new HistoryPanel());
+        tp.addTab("History", historyPanel);
 
         frame.getContentPane().add(tp);
         frame.pack();

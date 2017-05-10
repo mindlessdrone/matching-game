@@ -14,10 +14,12 @@ public class SinglePlayerPanel extends JPanel
     //  Sets up this panel with two labels.
     //-----------------------------------------------------------------
     private JButton start,reset,clear,end;
-    private JPanel panel1 = new JPanel();
     private GameTilePanel gamePanel;
+    private HistoryPanel historyPanel;
+    JLabel statusText;
+    int players;
 
-    public SinglePlayerPanel()
+    public SinglePlayerPanel(HistoryPanel hPanel)
     {
         setBackground(new Color(130, 210, 225));
         start = new JButton("Start the Game");
@@ -26,6 +28,9 @@ public class SinglePlayerPanel extends JPanel
         end = new JButton("End the System");
 
         setLayout(new BorderLayout());
+
+        historyPanel = hPanel;
+        statusText = new JLabel("");
 
         start.addActionListener(new ButtonListener());
         reset.addActionListener(new ButtonListener());
@@ -42,7 +47,11 @@ public class SinglePlayerPanel extends JPanel
         add(buttonPanel, BorderLayout.LINE_END);
 
         gamePanel = new GameTilePanel();
+        gamePanel.setHistoryObj(historyPanel);
+        gamePanel.setStatusObj(statusText);
+
         add(gamePanel, BorderLayout.CENTER);
+        add(statusText, BorderLayout.PAGE_END);
     }
     private class ButtonListener implements ActionListener
     {
@@ -53,9 +62,22 @@ public class SinglePlayerPanel extends JPanel
         {
             if (event.getSource() == start)
             {
-                int players = getNumberPlayers();
-                gamePanel.initGame(players);        
+                players = getNumberPlayers();
+                gamePanel.initGame(players, true);        
             }
+            else if (event.getSource() == clear)
+            {
+                gamePanel.initGame(players, false);
+            }
+            else if (event.getSource() == reset)
+            {
+                historyPanel.clearHistoryState();
+            }
+            else
+            {
+                // exit program
+                System.exit(0);
+            } // end if
         }
     }
 

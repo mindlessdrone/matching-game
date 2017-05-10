@@ -9,12 +9,15 @@ public class GameTilePanel extends JPanel
     // class fields
     JButton[] tiles;  // tiles used for games
     DefaultListModel playerLabels;  // list of player labels
-    int[] tilesSelected; // tiles selected
+    ArrayList<Integer> tilesSelected; // tiles selected
     int numTilesSelected;    // number of tiles selected
     int[] answers;          // number answers DEBUGGING ONLY
     Player[] players;       // player objects carrying player state
-    int currentPlayer;      // current player
-    
+    int currentTurn;      // current turn number
+    int avgAttempts;      // average attempts taken by user in single player 
+    int sumAttempts;       // sum of attempts taken in single player mode
+    HistoryPanel historyPanel;  // panel that keeps track of history state
+    JLabel statusText;
 
     public GameTilePanel()
     {
@@ -30,7 +33,7 @@ public class GameTilePanel extends JPanel
         tiles = new JButton[16];
 
         // init tiles selected array
-        tilesSelected = new int[16];
+        tilesSelected = new ArrayList<>();
 
         // set layout
         setLayout(new BorderLayout());
@@ -75,12 +78,24 @@ public class GameTilePanel extends JPanel
 
     }
 
+    public void setHistoryObj(HistoryPanel hPanel)
+    {
+        historyPanel = hPanel;
+    }
+
+    public void setStatusObj(JLabel status)
+    {
+        statusText = status;
+    }
+
+
     // initalizes game state
-    public void initGame(int numPlayers)
+    public void initGame(int numPlayers, boolean randomize)
     {
         // initialize players array
         players = new Player[numPlayers];
-
+        
+        statusText.setText("Player 1's turn");
         
         // clear players score list
         playerLabels.removeAllElements();
@@ -94,12 +109,14 @@ public class GameTilePanel extends JPanel
             // add player score label
             playerLabels.addElement(String.format("Player %d - 0", i + 1));
         }
+        
 
         // permute answer array
-        permuteArray(answers);
+        if (randomize)
+            permuteArray(answers);
 
         // set current player to first player
-        currentPlayer = 0;
+        currentTurn = 0;
 
         // enable all of the buttons
         for (int i = 0; i < tiles.length; i++)
@@ -156,32 +173,91 @@ public class GameTilePanel extends JPanel
             // local variables
             JButton sourceTile = (JButton) e.getSource(); // tile clicked
             int currPlayer;
+            int maxPlayerIndex = 0;
 
             sourceTile.setText(new Integer(answers[numButton]).toString());
             sourceTile.setEnabled(false);
 
             // add tile to selected tiles array
-            tilesSelected[numTilesSelected] = numButton;
+            tilesSelected.add(numButton);
 
-            // increment number of tiles selected
-            numTilesSelected++;
+
 
             if (numTilesSelected % 2 == 0)
             {
+                
+                statusText.setText("Player " +
+                        (((currentTurn+1) % players.length) + 1) + "'s turn");
+
+                // if we are in single player
+                if (players.length == 1)
+                {
+                    players[currentTurn % players.length].modifyScore(1);
+
+                    // update current players score
+                    playerLabels.setElementAt(String.format("Player 1 - %d",
+                                players[0].getScore()), 0);
+                }
+
                 // first tile selected by current player
-                first = tilesSelected[numTilesSelected - 1];
+                first = tilesSelected.get(numTilesSelected - 1);
 
                 // second tile selected by current player
-                second = tilesSelected[numTilesSelected - 2];
+                second = tilesSelected.get(numTilesSelected - 2);
 
                 // do they match?
                 if (answers[first] == answers[second])
                 {
                     // add to current player's score
-                    players[currentPlayer % players.length].modifyScore(10);
-                    
-                    currPlayer = currentPlayer % players.length;
 
+                    if (players.length > 1)
+                    {
+                        players[currentTurn % players.length].modifyScore(10);
+                    }
+                    currPlayer = currentTurn % players.length;
+
+
+                    // is there a winner?
+                    if (numTilesSelected == 16)
+                    {
+                        // is this a single player game?
+                        if (players.length == 1)
+                        {
+                            // single player things
+                            historyPanel.addSinglePlayerGame(currentTurn + 1);                            
+                        }
+                        else
+                        {
+                            boolean isTie = true;
+
+                            // find player with highest score
+                            for (int i = 1; i < players.length; i++)
+                            {
+                                if (players[i].getScore() > players[maxPlayerIndex].getScore())
+                                {
+                                    isTie = false;
+                                    maxPlayerIndex = i;
+                                } // end if
+                            } // end for
+
+                            if (!isTie)
+                            {
+                                players[maxPlayerIndex].modifyScore(25);
+                                // update current players score
+                                playerLabels.setElementAt(String.format("Player %d - %d",
+                                            maxPlayerIndex + 1,
+                                            players[maxPlayerIndex].getScore()),
+                                        maxPlayerIndex);
+
+                                historyPanel.addPlayerWin(maxPlayerIndex + 1);
+                                statusText.setText("Player " + (maxPlayerIndex + 1) + " is the winner!");
+                            }
+                            else
+                            {
+                                statusText.setText("Woah! A tie!");
+                            }
+                        } // end if
+                    }
                     // update current players score
                     playerLabels.setElementAt(String.format("Player %d - %d",
                                 currPlayer + 1,
@@ -223,14 +299,8 @@ public class GameTilePanel extends JPanel
                 } // end if
 
                 // advance to next player
-                currentPlayer += 1;
+                currentTurn += 1;
 
-                // print out scores
-                System.out.println("Current scores, ");
-                for (Player p: players)
-                {
-                    System.out.println("\t" + p.getScore());
-                }
             }
 
         }
