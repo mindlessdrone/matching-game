@@ -266,6 +266,7 @@ public class GameTilePanel extends JPanel
                 {
 
                     // disable all tiles
+                    System.out.println("disabled");
                     for (int i = 0; i < tiles.length; i++)
                     {
                         tiles[i].setEnabled(false);
@@ -285,6 +286,9 @@ public class GameTilePanel extends JPanel
                             {
                                 tiles[i].setEnabled(true);
                             }
+
+                            tilesSelected.remove(tilesSelected.size() - 1);
+                            tilesSelected.remove(tilesSelected.size() - 1);
 
                             for (int i = 0; i < tilesSelected.size(); i++)
                             {
