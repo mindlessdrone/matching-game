@@ -13,10 +13,11 @@ public class GameTilePanel extends JPanel
     int[] answers;          // number answers DEBUGGING ONLY
     Player[] players;       // player objects carrying player state
     int currentTurn;      // current turn number
-    int avgAttempts;      // average attempts taken by user in single player 
-    int sumAttempts;       // sum of attempts taken in single player mode
+ //   int avgAttempts;      // average attempts taken by user in single player
+ //   int sumAttempts;       // sum of attempts taken in single player mode
     HistoryPanel historyPanel;  // panel that keeps track of history state
     JLabel statusText;
+    ImageIcon[] img = new ImageIcon[16];
 
     public GameTilePanel()
     {
@@ -31,9 +32,6 @@ public class GameTilePanel extends JPanel
         // initalize tile array
         tiles = new JButton[16];
 
-        // init tiles selected array
-        tilesSelected = new ArrayList<>();
-
         // set layout
         setLayout(new BorderLayout());
 
@@ -46,7 +44,7 @@ public class GameTilePanel extends JPanel
         {
             // initalize tile button
             tiles[i] = new JButton();
-
+            tiles[i].setDisabledIcon(new ImageIcon("null"));
             // disable all buttons
             tiles[i].setEnabled(false);
 
@@ -55,7 +53,6 @@ public class GameTilePanel extends JPanel
 
             // add to pane
             tilePanel.add(tiles[i]);
-
         }
 
         // initalize answer array
@@ -64,9 +61,12 @@ public class GameTilePanel extends JPanel
         {
             answers[i] = i / 2 + 1;
             answers[i + 1] = i / 2 + 1;
+
+            img[i] = new ImageIcon(( i / 2 + 1) + ".jpg");
+            img[i+1] = new ImageIcon(( i / 2 + 1) + ".jpg");
         }
 
-        
+
 
         // add tile panel
         add(tilePanel, BorderLayout.CENTER);
@@ -93,9 +93,9 @@ public class GameTilePanel extends JPanel
     {
         // initialize players array
         players = new Player[numPlayers];
-        
+        tilesSelected = new ArrayList<>();
         statusText.setText("Player 1's turn");
-        
+
         // clear players score list
         playerLabels.removeAllElements();
 
@@ -108,11 +108,11 @@ public class GameTilePanel extends JPanel
             // add player score label
             playerLabels.addElement(String.format("Player %d - 0", i + 1));
         }
-        
+
 
         // permute answer array
         if (randomize)
-            permuteArray(answers);
+            permuteArray(answers,img);
 
         // set current player to first player
         currentTurn = 0;
@@ -121,20 +121,20 @@ public class GameTilePanel extends JPanel
         for (int i = 0; i < tiles.length; i++)
         {
             tiles[i].setText("");
+            tiles[i].setIcon(new ImageIcon("null"));
             tiles[i].setEnabled(true);
         }
-
-
     }
 
 
-    private void permuteArray(int[] arr)
+    private void permuteArray(int[] arr,ImageIcon[] img)
     {
         // local constants
         // local variables
         Random r = new Random(); // random number generator
         int d;                   // number generated
         int temp;
+        ImageIcon tmpImg;
 
         for (int i = arr.length; i > 1; i--)
         {
@@ -145,6 +145,10 @@ public class GameTilePanel extends JPanel
             temp = arr[d];
             arr[d] = arr[i - 1];
             arr[i - 1] = temp;
+
+            tmpImg = img [d];
+            img [d] = img [i - 1];
+            img[i-1] = tmpImg;
         }
     }
 
@@ -163,7 +167,7 @@ public class GameTilePanel extends JPanel
             numButton = i;
 
             timer = new java.util.Timer();
-        } 
+        }
         @Override
         public void actionPerformed(ActionEvent e)
         {
@@ -173,17 +177,17 @@ public class GameTilePanel extends JPanel
             int currPlayer;
             int maxPlayerIndex = 0;
 
-            sourceTile.setText(new Integer(answers[numButton]).toString());
+            //sourceTile.setText(new Integer(answers[numButton]).toString());
+            //sourceTile.setIcon(img[numButton]);
+            sourceTile.setDisabledIcon(img[numButton]);
             sourceTile.setEnabled(false);
 
             // add tile to selected tiles array
             tilesSelected.add(numButton);
 
-
-
             if (tilesSelected.size() % 2 == 0)
             {
-                
+
                 statusText.setText("Player " +
                         (((currentTurn+1) % players.length) + 1) + "'s turn");
 
@@ -194,7 +198,7 @@ public class GameTilePanel extends JPanel
 
                     // update current players score
                     playerLabels.setElementAt(String.format("Player 1 - %d",
-                                players[0].getScore()), 0);
+                            players[0].getScore()), 0);
                 }
 
                 // first tile selected by current player
@@ -222,7 +226,7 @@ public class GameTilePanel extends JPanel
                         if (players.length == 1)
                         {
                             // single player things
-                            historyPanel.addSinglePlayerGame(currentTurn + 1);                            
+                            historyPanel.addSinglePlayerGame(currentTurn + 1);
                         }
                         else
                         {
@@ -243,8 +247,8 @@ public class GameTilePanel extends JPanel
                                 players[maxPlayerIndex].modifyScore(25);
                                 // update current players score
                                 playerLabels.setElementAt(String.format("Player %d - %d",
-                                            maxPlayerIndex + 1,
-                                            players[maxPlayerIndex].getScore()),
+                                        maxPlayerIndex + 1,
+                                        players[maxPlayerIndex].getScore()),
                                         maxPlayerIndex);
 
                                 historyPanel.addPlayerWin(maxPlayerIndex + 1);
@@ -258,8 +262,8 @@ public class GameTilePanel extends JPanel
                     }
                     // update current players score
                     playerLabels.setElementAt(String.format("Player %d - %d",
-                                currPlayer + 1,
-                                players[currPlayer].getScore()),
+                            currPlayer + 1,
+                            players[currPlayer].getScore()),
                             currPlayer);
                 }
                 else
@@ -276,9 +280,11 @@ public class GameTilePanel extends JPanel
                         {
                             tiles[first].setEnabled(true);
                             tiles[first].setText("");
+                            tiles[first].setDisabledIcon(new ImageIcon("null"));
 
                             tiles[second].setEnabled(true);
                             tiles[second].setText("");
+                            tiles[second].setDisabledIcon(new ImageIcon("null"));
 
 
                             // re-enable
@@ -303,7 +309,6 @@ public class GameTilePanel extends JPanel
                 currentTurn += 1;
 
             }
-
         }
     }
 }
